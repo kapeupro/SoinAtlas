@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Annuaire RPPS — Registre des professionnels de santé</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600;9..144,900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.css" rel="stylesheet" integrity="sha384-GTsgKcJXGSkBp0M68qpxkz9XovzVH0PwSrjYONvkn3tXtySOSq+a14bG2gVJHwQG" crossorigin="anonymous">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.9.0/mapbox-gl.js" integrity="sha384-QRI8HEhaDamjVGfoos6X0AB+VVxCE4fAm6jaRZqcMn8mPsbxJvCc8cyG3Wu/+Pyq" crossorigin="anonymous"></script>
+<style>
+:root {
+  --papier: #faf6ee;
+  --papier-2: #f3ede0;
+  --encre: #1b2440;
+  --encre-2: #4a5168;
+  --bleu: #000091;
+  --rouge: #e1000f;
+  --filet: #d8d0bd;
+  --jaune: #fdf3d8;
+  font-size: 16px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--papier);
+  color: var(--encre);
+  font-family: "IBM Plex Sans", sans-serif;
+  background-image: radial-gradient(rgba(27,36,64,.035) 1px, transparent 1px);
+  background-size: 22px 22px;
+  min-height: 100vh;
+}
+
+/* ---------- entête ---------- */
+.tricolore { display: flex; height: 5px; }
+.tricolore span { flex: 1; }
+.tricolore span:nth-child(1) { background: var(--bleu); }
+.tricolore span:nth-child(2) { background: #fff; }
+.tricolore span:nth-child(3) { background: var(--rouge); }
+
+header {
+  border-bottom: 2px solid var(--encre);
+  padding: 2.6rem 2rem 1.6rem;
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+}
+.titre h1 {
+  font-family: "Fraunces", serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: .95;
+  letter-spacing: -.02em;
+}
+.titre h1 em { font-style: italic; font-weight: 300; color: var(--bleu); }
+.titre p {
+  margin-top: .7rem; color: var(--encre-2); font-size: .85rem;
+  text-transform: uppercase; letter-spacing: .14em;
+}
+.compteur {
+  font-family: "Fraunces", serif; text-align: right;
+}
+.compteur b { font-size: 2rem; font-weight: 600; display: block; font-variant-numeric: tabular-nums; }
+.compteur small { color: var(--encre-2); letter-spacing: .1em; text-transform: uppercase; font-family: "IBM Plex Sans", sans-serif; font-size: .7rem; }
+
+main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 2rem 5rem; }
+
+/* ---------- recherche ---------- */
+.recherche {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr 1.2fr .7fr auto;
+  gap: 0; border: 2px solid var(--encre); background: #fff;
+  box-shadow: 6px 6px 0 rgba(27,36,64,.12);
+  margin: 1.4rem 0 1rem;
+}
+.recherche label {
+  display: block; padding: .55rem .8rem .1rem;
+  font-size: .62rem; text-transform: uppercase; letter-spacing: .12em; color: var(--encre-2);
+}
+.recherche .champ { border-right: 1px solid var(--filet); }
+.recherche input {
+  width: 100%; border: 0; background: transparent; outline: none;
+  padding: .25rem .8rem .6rem; font: 500 1rem "IBM Plex Sans", sans-serif; color: var(--encre);
+}
+.recherche input::placeholder { color: #b6b0a0; font-weight: 400; }
+.recherche select {
+  width: 100%; border: 0; background: transparent; outline: none;
+  padding: .25rem .5rem .6rem; font: 500 .92rem "IBM Plex Sans", sans-serif; color: var(--encre);
+  appearance: auto; cursor: pointer;
+}
+.recherche .large { border-top: 1px solid var(--filet); border-right: 1px solid var(--filet); }
+.recherche .coche {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .9rem .8rem; font-size: .8rem; cursor: pointer; user-select: none;
+  border-top: 1px solid var(--filet); text-transform: none; letter-spacing: 0; color: var(--encre);
+}
+.recherche .coche input { width: auto; accent-color: var(--bleu); transform: scale(1.15); cursor: pointer; }
+.recherche button {
+  border: 0; border-left: 2px solid var(--encre);
+  background: var(--bleu); color: #fff; cursor: pointer;
+  font: 600 .85rem "IBM Plex Sans", sans-serif; letter-spacing: .1em; text-transform: uppercase;
+  padding: 0 1.6rem; transition: background .15s;
+}
+.recherche button:hover { background: var(--rouge); }
+.recherche .large:nth-of-type(5), .recherche .large:nth-of-type(6) { grid-column: span 2; }
+@media (max-width: 860px) {
+  .recherche { grid-template-columns: 1fr 1fr; }
+  .recherche button { grid-column: span 2; padding: .8rem; border-left: 0; border-top: 2px solid var(--encre); order: 9; }
+  .recherche .large, .recherche .large:nth-of-type(5), .recherche .large:nth-of-type(6) { grid-column: span 1; }
+  .recherche .coche { grid-column: span 2; }
+}
+
+/* ---------- bandeau état ---------- */
+.etat {
+  display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: .5rem;
+  font-size: .8rem; color: var(--encre-2); padding: .4rem .2rem 1rem;
+}
+.etat b { color: var(--encre); font-variant-numeric: tabular-nums; }
+
+/* ---------- résultats ---------- */
+.liste { display: flex; flex-direction: column; }
+.fiche {
+  display: grid; grid-template-columns: 1fr auto; gap: .2rem 1rem;
+  padding: 1rem .2rem; border-top: 1px solid var(--filet);
+  cursor: pointer; position: relative;
+  animation: pose .35s cubic-bezier(.2,.7,.3,1) both;
+}
+@keyframes pose { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.fiche:hover { background: var(--jaune); }
+.fiche:hover::before {
+  content: ""; position: absolute; left: -2rem; top: 0; bottom: 0; width: 4px; background: var(--rouge);
+}
+.fiche .nom { font-family: "Fraunces", serif; font-size: 1.25rem; font-weight: 600; }
+.fiche .nom .prenom { font-weight: 300; font-style: italic; }
+.fiche .sous { color: var(--encre-2); font-size: .85rem; margin-top: .15rem; }
+.fiche .sous .spec { color: var(--bleu); }
+.fiche .lieu { text-align: right; font-size: .85rem; align-self: center; }
+.fiche .lieu .ville { font-weight: 600; }
+.fiche .lieu .rpps { font-family: "IBM Plex Mono", monospace; font-size: .72rem; color: var(--encre-2); display: block; margin-top: .2rem; }
+.vide { padding: 3rem; text-align: center; color: var(--encre-2); font-style: italic; font-family: "Fraunces", serif; font-size: 1.2rem; border-top: 1px solid var(--filet); }
+
+/* ---------- pagination ---------- */
+.pagination {
+  display: flex; gap: .6rem; justify-content: center; align-items: center;
+  margin-top: 2rem; font-variant-numeric: tabular-nums;
+}
+.pagination button {
+  border: 2px solid var(--encre); background: #fff; cursor: pointer;
+  font: 600 .8rem "IBM Plex Sans", sans-serif; padding: .45rem .9rem;
+  box-shadow: 3px 3px 0 rgba(27,36,64,.15); transition: all .12s;
+}
+.pagination button:hover:not(:disabled) { background: var(--encre); color: var(--papier); }
+.pagination button:disabled { opacity: .3; cursor: default; box-shadow: none; }
+.pagination .ou { font-size: .85rem; color: var(--encre-2); padding: 0 .6rem; }
+
+/* ---------- carte ---------- */
+.carto { margin-top: 3.5rem; }
+.carto h2 {
+  font-family: "Fraunces", serif; font-weight: 900; font-size: 1.3rem;
+  border-bottom: 2px solid var(--encre); padding-bottom: .4rem; margin-bottom: .5rem;
+}
+.carto-note { font-size: .78rem; color: var(--encre-2); margin-bottom: .8rem; }
+.couches { display: flex; gap: 1.1rem; flex-wrap: wrap; align-items: center; margin-bottom: .8rem; font-size: .82rem; }
+.couches-titre { font-weight: 600; text-transform: uppercase; letter-spacing: .08em; font-size: .68rem; color: var(--encre-2); }
+.couches .radio { display: flex; align-items: center; gap: .4rem; cursor: pointer; user-select: none; }
+.couches .radio input { accent-color: var(--bleu); cursor: pointer; }
+.couches .cle { display: flex; align-items: center; gap: .45rem; }
+.couches .bascule { cursor: pointer; user-select: none; }
+.couches .bascule input { accent-color: var(--rouge); cursor: pointer; }
+.couches .sep { border-left: 1px solid var(--filet); padding-left: 1.1rem; }
+.pastille { width: 13px; height: 13px; border-radius: 50%; border: 1px solid var(--encre); display: inline-block; }
+.pastille.bleu { background: #000091; opacity: .6; }
+.pastille.rouge { background: var(--rouge); }
+.pastille.vert { background: #9bd13f; }
+.echelle { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; font-size: .74rem; color: var(--encre-2); margin-bottom: .8rem; }
+.echelle i { width: 22px; height: 13px; border: 1px solid var(--filet); display: inline-block; margin-left: .4rem; }
+#carte {
+  height: 520px; border: 2px solid var(--encre);
+  box-shadow: 6px 6px 0 rgba(27,36,64,.12);
+}
+.mapboxgl-popup-content {
+  font-family: "IBM Plex Sans", sans-serif; color: var(--encre);
+  border: 2px solid var(--encre); border-radius: 0; box-shadow: 4px 4px 0 rgba(27,36,64,.2);
+}
+.mapboxgl-popup-content b { font-family: "Fraunces", serif; font-size: 1.05rem; }
+
+/* ---------- stats ---------- */
+.stats { margin-top: 3.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+@media (max-width: 860px) { .stats { grid-template-columns: 1fr; } }
+.stats h2 {
+  font-family: "Fraunces", serif; font-weight: 900; font-size: 1.3rem;
+  border-bottom: 2px solid var(--encre); padding-bottom: .4rem; margin-bottom: 1rem;
+}
+.barre { display: grid; grid-template-columns: 11rem 1fr 3.5rem; gap: .6rem; align-items: center; font-size: .8rem; padding: .28rem 0; }
+.barre .lib { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.barre .jauge { height: 12px; background: var(--papier-2); position: relative; }
+.barre .jauge i {
+  position: absolute; inset: 0 auto 0 0; background: var(--bleu);
+  animation: pousse .6s cubic-bezier(.2,.7,.2,1) both;
+}
+.barre:nth-child(odd) .jauge i { background: var(--encre); }
+@keyframes pousse { from { width: 0 !important; } }
+.barre .nb { text-align: right; font-family: "IBM Plex Mono", monospace; font-size: .72rem; }
+
+/* ---------- volet détail ---------- */
+.voile {
+  position: fixed; inset: 0; background: rgba(27,36,64,.45);
+  opacity: 0; pointer-events: none; transition: opacity .25s; z-index: 10;
+}
+.voile.ouvert { opacity: 1; pointer-events: auto; }
+.volet {
+  position: fixed; top: 0; right: 0; bottom: 0; width: min(480px, 92vw);
+  background: var(--papier); border-left: 2px solid var(--encre); z-index: 11;
+  transform: translateX(102%); transition: transform .3s cubic-bezier(.2,.7,.2,1);
+  overflow-y: auto; box-shadow: -10px 0 30px rgba(27,36,64,.2);
+}
+.volet.ouvert { transform: none; }
+.volet .tricolore { position: sticky; top: 0; }
+.volet-corps { padding: 2rem; }
+.volet .fermer {
+  position: absolute; top: 1.2rem; right: 1.2rem; border: 2px solid var(--encre);
+  background: #fff; width: 2.2rem; height: 2.2rem; cursor: pointer; font-size: 1rem;
+  box-shadow: 3px 3px 0 rgba(27,36,64,.15);
+}
+.volet .fermer:hover { background: var(--rouge); color: #fff; }
+.volet h3 { font-family: "Fraunces", serif; font-size: 1.8rem; font-weight: 900; line-height: 1; margin: 1.2rem 0 .2rem; }
+.volet h3 .prenom { font-weight: 300; font-style: italic; display: block; font-size: 1.2rem; }
+.volet .rpps-badge {
+  display: inline-block; font-family: "IBM Plex Mono", monospace; font-size: .75rem;
+  background: var(--encre); color: var(--papier); padding: .2rem .6rem; margin-top: .6rem;
+}
+.volet dl { margin-top: 1.6rem; }
+.volet dt {
+  font-size: .62rem; text-transform: uppercase; letter-spacing: .12em;
+  color: var(--encre-2); border-top: 1px solid var(--filet); padding-top: .6rem; margin-top: .8rem;
+}
+.volet dd { font-size: .95rem; margin-top: .15rem; }
+.volet .diplomes h4 {
+  font-family: "Fraunces", serif; font-size: 1.05rem; margin: 1.8rem 0 .6rem;
+  border-bottom: 2px solid var(--encre); padding-bottom: .3rem;
+}
+.volet .diplome { font-size: .85rem; padding: .45rem 0; border-bottom: 1px dashed var(--filet); }
+.volet .diplome small { color: var(--encre-2); display: block; }
+
+/* ---------- zones sous-dotées ---------- */
+.zsd { margin-top: 3.5rem; }
+.zsd h2 {
+  font-family: "Fraunces", serif; font-weight: 900; font-size: 1.3rem;
+  border-bottom: 2px solid var(--encre); padding-bottom: .4rem; margin-bottom: .5rem;
+}
+.zsd-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: .6rem; margin-top: 1rem; }
+.zsd-carte {
+  border: 1px solid var(--filet); background: #fff; padding: .7rem .9rem;
+  animation: pose .35s cubic-bezier(.2,.7,.3,1) both;
+}
+.zsd-carte .dep { font-size: .72rem; color: var(--encre-2); text-transform: uppercase; letter-spacing: .08em; }
+.zsd-carte .eff { font-family: "Fraunces", serif; font-size: 1.7rem; font-weight: 600; line-height: 1.1; }
+.zsd-carte .eff small { font-size: .7rem; font-weight: 400; color: var(--encre-2); font-family: "IBM Plex Sans", sans-serif; }
+.zsd-carte .taux { font-size: .75rem; font-family: "IBM Plex Mono", monospace; margin-top: .2rem; }
+.zsd-carte .taux.pos { color: #0a7f3f; }
+.zsd-carte .taux.neg { color: var(--rouge); }
+
+footer {
+  border-top: 1px solid var(--filet); margin-top: 4rem; padding: 1.4rem 2rem;
+  max-width: 1100px; margin-inline: auto;
+  font-size: .72rem; color: var(--encre-2); display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem;
+}
+.chargement { text-align: center; padding: 3rem; font-family: "Fraunces", serif; font-style: italic; color: var(--encre-2); }
+</style>
+</head>
+<body>
+<div class="tricolore"><span></span><span></span><span></span></div>
+
+<header>
+  <div class="titre">
+    <h1>Annuaire <em>des professionnels</em><br>de santé</h1>
+    <p>Registre RPPS — données ouvertes · Annuaire Santé / ANS</p>
+  </div>
+  <div class="compteur"><b id="total-global">—</b><small>praticiens référencés</small></div>
+</header>
+
+<main>
+  <form class="recherche" id="form">
+    <div class="champ"><label for="q">Nom ou prénom</label><input id="q" name="q" placeholder="Durand, Marie…" autocomplete="off"></div>
+    <div class="champ"><label for="profession">Profession</label><input id="profession" name="profession" placeholder="Médecin, Infirmier…"></div>
+    <div class="champ"><label for="ville">Ville</label><input id="ville" name="ville" placeholder="Lyon…"></div>
+    <div class="champ"><label for="departement">Dépt</label><input id="departement" name="departement" placeholder="69" maxlength="3"></div>
+    <button type="submit">Chercher</button>
+    <div class="champ large"><label for="specialite">Spécialité</label>
+      <select id="specialite"><option value="">Toutes</option></select></div>
+    <div class="champ large"><label for="secteur">Secteur d'activité</label>
+      <select id="secteur"><option value="">Tous</option></select></div>
+    <label class="coche large" for="avec_tel">
+      <input type="checkbox" id="avec_tel"> Uniquement avec téléphone
+    </label>
+  </form>
+
+  <div class="etat"><span id="resume">…</span><span>page <b id="num-page">1</b></span></div>
+
+  <div class="liste" id="liste"><div class="chargement">Consultation du registre…</div></div>
+
+  <nav class="pagination">
+    <button id="prec" disabled>← Précédent</button>
+    <span class="ou" id="pages-info"></span>
+    <button id="suiv" disabled>Suivant →</button>
+  </nav>
+
+  <section class="carto">
+    <h2>Répartition sur le territoire</h2>
+    <p class="carto-note">Praticiens agrégés par code postal (centroïde de commune) — la carte suit les filtres de recherche. Cliquez sur un point pour le détail.</p>
+    <div class="couches">
+      <span class="couches-titre">Affichage&nbsp;:</span>
+      <label class="radio"><input type="radio" name="couche" value="densite" checked> Densité de médecins</label>
+      <label class="radio"><input type="radio" name="couche" value="cercles"> Points par code postal</label>
+      <label class="radio"><input type="radio" name="couche" value="zsd"> Zones sous-dotées</label>
+      <label class="cle bascule sep"><input type="checkbox" id="toggle-solidaire"> <i class="pastille rouge"></i> Lieux de consultation solidaire</label>
+    </div>
+    <div class="echelle" id="echelle-densite">
+      <span>Médecins pour 100 000 hab.&nbsp;:</span>
+      <i style="background:#d73027"></i> &lt;250
+      <i style="background:#fc8d59"></i> 250–300
+      <i style="background:#fee08b"></i> 300–350
+      <i style="background:#a6d96a"></i> 350–400
+      <i style="background:#1a9850"></i> 400+
+    </div>
+    <div class="echelle" id="echelle-zsd" hidden>
+      <span>Installations en zones sous-dotées&nbsp;:</span>
+      <i style="background:#3a3f2e"></i> 0
+      <i style="background:#6f9d3a"></i> 1–9
+      <i style="background:#9bd13f"></i> 10–19
+      <i style="background:#d7f04a"></i> 20–39
+      <i style="background:#fff75e"></i> 40+
+    </div>
+    <div id="carte"></div>
+  </section>
+
+  <section class="stats">
+    <div><h2>Par profession</h2><div id="stats-prof" class="chargement">…</div></div>
+    <div><h2>Par département</h2><div id="stats-dep" class="chargement">…</div></div>
+  </section>
+
+  <section class="zsd">
+    <h2>Installations de généralistes en zones sous-dotées</h2>
+    <p class="carto-note">Médecins généralistes nouvellement installés en zone d'intervention prioritaire, par département (source DREES, année en cours). Le taux indique l'évolution sur 12 mois.</p>
+    <div id="stats-zsd" class="chargement">…</div>
+  </section>
+</main>
+
+<div class="voile" id="voile"></div>
+<aside class="volet" id="volet" aria-label="Fiche praticien">
+  <div class="tricolore"><span></span><span></span><span></span></div>
+  <button class="fermer" id="fermer" aria-label="Fermer">✕</button>
+  <div class="volet-corps" id="volet-corps"></div>
+</aside>
+
+<footer>
+  <span>Source : Annuaire Santé (ANS) via data.gouv.fr — Licence Ouverte Etalab 2.0</span>
+  <span>Coordonnées professionnelles uniquement · droit d'opposition applicable</span>
+</footer>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const fmt = (n) => Number(n).toLocaleString("fr-FR");
+let page = 1, totalPages = 1, enCours = null;
+
+async function api(path) {
+  const r = await fetch(path);
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
+function params() {
+  const p = new URLSearchParams();
+  for (const k of ["q", "profession", "ville", "departement", "specialite", "secteur"]) {
+    const v = $("#" + k).value.trim();
+    if (v) p.set(k, v);
+  }
+  if ($("#avec_tel").checked) p.set("avec_tel", "true");
+  p.set("page", page);
+  return p;
+}
+
+async function chercher() {
+  $("#liste").innerHTML = '<div class="chargement">Consultation du registre…</div>';
+  try {
+    const d = await api("/praticiens?" + params());
+    totalPages = Math.max(1, Math.ceil(d.total / d.page_size));
+    $("#resume").innerHTML = `<b>${fmt(d.total)}</b> résultat${d.total > 1 ? "s" : ""}`;
+    $("#num-page").textContent = page;
+    $("#pages-info").textContent = `${page} / ${fmt(totalPages)}`;
+    $("#prec").disabled = page <= 1;
+    $("#suiv").disabled = page >= totalPages;
+    if (!d.results.length) {
+      $("#liste").innerHTML = '<div class="vide">Aucune fiche ne correspond à cette recherche.</div>';
+      return;
+    }
+    majCarte();
+    $("#liste").innerHTML = d.results.map((r, i) => `
+      <article class="fiche" data-rpps="${r.identifiant_pp}" style="animation-delay:${i * 28}ms">
+        <div>
+          <div class="nom">${maj(r.nom_d_exercice)} <span class="prenom">${cap(r.prenom_d_exercice)}</span></div>
+          <div class="sous">${r.libelle_profession ?? ""}${r.specialites ? ` — <span class="spec">${r.specialites}</span>` : ""}</div>
+        </div>
+        <div class="lieu">
+          <span class="ville">${cap(r.ville ?? "")}</span> ${r.code_postal ?? ""}
+          <span class="rpps">RPPS ${r.identifiant_pp}</span>
+        </div>
+      </article>`).join("");
+  } catch (e) {
+    $("#liste").innerHTML = `<div class="vide">Le registre est indisponible (${e.message}). La base est peut-être encore en cours de chargement.</div>`;
+  }
+}
+
+const maj = (s) => (s ?? "").toUpperCase();
+const cap = (s) => (s ?? "").toLowerCase().replace(/(^|[\s\-'])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
+
+async function ouvrirFiche(rpps) {
+  $("#voile").classList.add("ouvert");
+  $("#volet").classList.add("ouvert");
+  $("#volet-corps").innerHTML = '<div class="chargement">Ouverture de la fiche…</div>';
+  try {
+    const d = await api("/praticiens/" + rpps);
+    $("#volet-corps").innerHTML = `
+      <h3>${maj(d.nom_d_exercice)}<span class="prenom">${cap(d.prenom_d_exercice)}</span></h3>
+      <span class="rpps-badge">RPPS ${d.identifiant_pp}</span>
+      <dl>
+        <dt>Profession</dt><dd>${d.libelle_profession ?? "—"}</dd>
+        ${d.specialites ? `<dt>Spécialités</dt><dd>${d.specialites}</dd>` : ""}
+        <dt>Mode d'exercice</dt><dd>${d.mode_d_exercice ?? "—"}</dd>
+        <dt>Structure</dt><dd>${d.raison_sociale_structure || "—"}</dd>
+        ${d.secteur ? `<dt>Secteur</dt><dd>${d.secteur}</dd>` : ""}
+        <dt>Adresse</dt><dd>${[cap(d.adresse ?? ""), [d.code_postal, cap(d.ville ?? "")].filter(Boolean).join(" ")].filter(Boolean).join("<br>") || "—"}</dd>
+        <dt>Téléphone</dt><dd>${[d.telephone, d.telephone_2].filter(Boolean).join(" · ") || "—"}</dd>
+        ${d.email ? `<dt>E-mail</dt><dd><a href="mailto:${d.email}">${d.email}</a></dd>` : ""}
+      </dl>
+      <div class="diplomes">
+        <h4>Diplômes & autorisations</h4>
+        ${(d.diplomes ?? []).length ? d.diplomes.map(dip => `
+          <div class="diplome">${dip.libelle_diplome_obtenu ?? dip.libelle_type_diplome_obtenu ?? "Diplôme"}
+            <small>${[dip.libelle_type_autorisation, dip.libelle_discipline_autorisation].filter(Boolean).join(" · ")}</small>
+          </div>`).join("") : '<div class="diplome">Aucun diplôme référencé dans l\'extraction.</div>'}
+      </div>`;
+  } catch (e) {
+    $("#volet-corps").innerHTML = `<div class="chargement">Fiche introuvable (${e.message}).</div>`;
+  }
+}
+
+function fermerFiche() {
+  $("#voile").classList.remove("ouvert");
+  $("#volet").classList.remove("ouvert");
+}
+
+async function remplirFiltres() {
+  try {
+    const [specs, secteurs] = await Promise.all([
+      api("/stats/specialites"), api("/stats/secteurs"),
+    ]);
+    $("#specialite").innerHTML = '<option value="">Toutes</option>' +
+      specs.map((s) => `<option value="${s.specialite}">${s.specialite} (${fmt(s.nb)})</option>`).join("");
+    $("#secteur").innerHTML = '<option value="">Tous</option>' +
+      secteurs.map((s) => `<option value="${s.secteur}">${s.secteur} (${fmt(s.nb)})</option>`).join("");
+  } catch { /* filtres facultatifs : la recherche reste utilisable sans eux */ }
+}
+
+async function statsZsd() {
+  try {
+    const z = await api("/zones-sous-dotees");
+    $("#stats-zsd").innerHTML = '<div class="zsd-grille">' + z.map((d, i) => {
+      const t = d.taux_evolution;
+      const cls = t > 0 ? "pos" : t < 0 ? "neg" : "";
+      const signe = t > 0 ? "+" : "";
+      return `<div class="zsd-carte" style="animation-delay:${Math.min(i, 30) * 20}ms">
+        <div class="dep">${d.code_departement} · ${d.libelle_departement}</div>
+        <div class="eff">${fmt(d.effectif ?? 0)} <small>installation${d.effectif > 1 ? "s" : ""}</small></div>
+        <div class="taux ${cls}">${t != null ? signe + (Math.round(t * 10) / 10).toLocaleString("fr-FR") + " % sur 12 mois" : "—"}</div>
+      </div>`;
+    }).join("") + "</div>";
+  } catch { $("#stats-zsd").textContent = "Données zones sous-dotées indisponibles."; }
+}
+
+async function stats() {
+  try {
+    const [profs, deps, tout] = await Promise.all([
+      api("/stats/professions"), api("/stats/departements"), api("/praticiens?page=1"),
+    ]);
+    $("#total-global").textContent = fmt(tout.total);
+    const barres = (rows, libelle) => {
+      const max = rows[0]?.nb ?? 1;
+      return rows.slice(0, 10).map((r, i) => `
+        <div class="barre">
+          <span class="lib" title="${libelle(r)}">${libelle(r)}</span>
+          <span class="jauge"><i style="width:${(100 * r.nb / max).toFixed(1)}%; animation-delay:${i * 60}ms"></i></span>
+          <span class="nb">${fmt(r.nb)}</span>
+        </div>`).join("");
+    };
+    $("#stats-prof").innerHTML = barres(profs, (r) => r.profession ?? "Non renseigné");
+    $("#stats-dep").innerHTML = barres(deps, (r) => "Département " + (r.departement || "—"));
+  } catch {
+    $("#stats-prof").textContent = $("#stats-dep").textContent = "Statistiques indisponibles.";
+  }
+}
+
+/* ---------- carte ---------- */
+// Token Mapbox injecté côté serveur depuis la variable d'environnement MAPBOX_TOKEN
+// (voir 04_api.py / README). En l'absence de token, la carte est simplement désactivée.
+const MAPBOX_TOKEN = "__MAPBOX_TOKEN__";
+let carte = null, carteCharge = false;
+let couche = "densite";  // vue active : densite | cercles | zsd
+
+if (!MAPBOX_TOKEN || MAPBOX_TOKEN.startsWith("__")) {
+  // Pas de token configuré : on masque la section carte plutôt que de planter.
+  const sec = document.querySelector(".carto");
+  if (sec) sec.innerHTML = '<h2>Répartition sur le territoire</h2>' +
+    '<p class="carto-note">Carte désactivée : définissez la variable d\'environnement <code>MAPBOX_TOKEN</code> pour l\'activer (voir README).</p>';
+} else {
+  mapboxgl.accessToken = MAPBOX_TOKEN;
+  carte = new mapboxgl.Map({
+    container: "carte",
+    style: "mapbox://styles/mapbox/light-v11",
+    center: [2.4, 46.6],
+    zoom: 4.8,
+  });
+  carte.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+carte.on("load", () => {
+  // --- 1. Choroplèthe DENSITÉ de médecins (vue par défaut, la plus lisible) ---
+  carte.addSource("densite", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+  carte.addLayer({
+    id: "densite-fond",
+    type: "fill",
+    source: "densite",
+    paint: {
+      "fill-color": ["case", ["==", ["get", "densite"], null], "#555",
+        ["step", ["get", "densite"],
+          "#d73027", 250, "#fc8d59", 300, "#fee08b", 350, "#a6d96a", 400, "#1a9850"]],
+      "fill-opacity": 0.9,
+      "fill-outline-color": "#1b2440",
+    },
+  });
+  carte.on("click", "densite-fond", (e) => {
+    const p = e.features[0].properties;
+    const dens = p.densite != null && p.densite !== "" ? `<b>${(+p.densite).toLocaleString("fr-FR")}</b> médecins / 100 000 hab.` : "densité indisponible";
+    new mapboxgl.Popup({ closeButton: false })
+      .setLngLat(e.lngLat)
+      .setHTML(`<b>${p.nom}</b> (${p.code})<br>${dens}<br><small>${fmt(p.nb)} médecins · ${fmt(p.population)} hab.</small>`)
+      .addTo(carte);
+  });
+
+  // --- 2. Choroplèthe ZONES SOUS-DOTÉES (masqué) ---
+  carte.addSource("zsd", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+  carte.addLayer({
+    id: "zsd-fond",
+    type: "fill",
+    source: "zsd",
+    layout: { visibility: "none" },
+    paint: {
+      "fill-color": ["step", ["get", "effectif"],
+        "#3a3f2e", 1, "#6f9d3a", 10, "#9bd13f", 20, "#d7f04a", 40, "#fff75e"],
+      "fill-opacity": 0.82,
+      "fill-outline-color": "#1b2440",
+    },
+  });
+  carte.on("click", "zsd-fond", (e) => {
+    const p = e.features[0].properties;
+    const taux = p.taux != null && p.taux !== "" ? `<br>${p.taux > 0 ? "+" : ""}${(Math.round(p.taux * 10) / 10).toLocaleString("fr-FR")} % sur 12 mois` : "";
+    new mapboxgl.Popup({ closeButton: false })
+      .setLngLat(e.lngLat)
+      .setHTML(`<b>${p.nom}</b> (${p.code})<br>${fmt(p.effectif)} installation${p.effectif > 1 ? "s" : ""} en zone sous-dotée${taux}`)
+      .addTo(carte);
+  });
+
+  // --- 3. CERCLES par code postal (masqué par défaut) ---
+  carte.addSource("praticiens", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+  carte.addLayer({
+    id: "praticiens-cercles",
+    type: "circle",
+    source: "praticiens",
+    layout: { visibility: "none" },
+    paint: {
+      "circle-radius": ["interpolate", ["linear"], ["sqrt", ["get", "nb"]],
+        1, 2.5, 10, 5, 40, 11, 110, 22],
+      "circle-color": "#1f6feb",
+      "circle-opacity": 0.6,
+      "circle-stroke-width": 1,
+      "circle-stroke-color": "#0a2540",
+    },
+  });
+  carte.on("click", "praticiens-cercles", (e) => {
+    const p = e.features[0].properties;
+    new mapboxgl.Popup({ closeButton: false })
+      .setLngLat(e.features[0].geometry.coordinates)
+      .setHTML(`<b>${p.ville}</b> ${p.cp}<br>${fmt(p.nb)} praticien${p.nb > 1 ? "s" : ""}`)
+      .addTo(carte);
+  });
+
+  // --- 4. Lieux solidaires (overlay indépendant, masqué) ---
+  carte.addSource("solidaires", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+  carte.addLayer({
+    id: "solidaires-points",
+    type: "circle",
+    source: "solidaires",
+    layout: { visibility: "none" },
+    paint: {
+      "circle-radius": 6,
+      "circle-color": "#e1000f",
+      "circle-stroke-width": 1.5,
+      "circle-stroke-color": "#faf6ee",
+    },
+  });
+  carte.on("click", "solidaires-points", (e) => {
+    const p = e.features[0].properties;
+    const tel = p.telephone ? `<br>☎ ${p.telephone}` : "";
+    const site = p.site ? `<br><a href="${p.site}" target="_blank" rel="noopener">site internet</a>` : "";
+    new mapboxgl.Popup({ closeButton: true, maxWidth: "260px" })
+      .setLngLat(e.features[0].geometry.coordinates)
+      .setHTML(`<b>${p.titre}</b><br><small>${p.type_structure || ""}</small><br>${p.adresse || ""}, ${p.code_postal} ${p.ville}${tel}${site}`)
+      .addTo(carte);
+  });
+
+  for (const id of ["densite-fond", "zsd-fond", "praticiens-cercles", "solidaires-points"]) {
+    carte.on("mouseenter", id, () => carte.getCanvas().style.cursor = "pointer");
+    carte.on("mouseleave", id, () => carte.getCanvas().style.cursor = "");
+  }
+
+  carteCharge = true;
+  majCarte();
+});
+
+// Sélecteur de vue exclusif (densité / cercles / zones sous-dotées)
+const ECHELLES = { densite: "#echelle-densite", zsd: "#echelle-zsd" };
+async function activerCouche(nom) {
+  couche = nom;
+  carte.setLayoutProperty("densite-fond", "visibility", nom === "densite" ? "visible" : "none");
+  carte.setLayoutProperty("zsd-fond", "visibility", nom === "zsd" ? "visible" : "none");
+  carte.setLayoutProperty("praticiens-cercles", "visibility", nom === "cercles" ? "visible" : "none");
+  $("#echelle-densite").hidden = nom !== "densite";
+  $("#echelle-zsd").hidden = nom !== "zsd";
+  await majCarte();
+}
+for (const r of document.querySelectorAll('input[name="couche"]')) {
+  r.addEventListener("change", (e) => { if (e.target.checked) activerCouche(e.target.value); });
+}
+
+  $("#toggle-solidaire").addEventListener("change", async (e) => {
+    carte.setLayoutProperty("solidaires-points", "visibility", e.target.checked ? "visible" : "none");
+    if (e.target.checked && !carte.getSource("solidaires")._data.features.length) {
+      try { carte.getSource("solidaires").setData(await api("/geo/solidaires")); } catch {}
+    }
+  });
+}  // fin du bloc « token Mapbox présent »
+
+async function majCarte() {
+  if (!carteCharge || !carte) return;
+  const p = params(); p.delete("page");
+  try {
+    if (couche === "densite") {
+      // densité de médecins (ignore les filtres texte sauf profession pour rester cohérent)
+      const prof = $("#profession").value.trim() || "Médecin";
+      carte.getSource("densite").setData(await api("/geo/densite?profession=" + encodeURIComponent(prof)));
+    } else if (couche === "zsd") {
+      if (!carte.getSource("zsd")._data.features.length)
+        carte.getSource("zsd").setData(await api("/geo/zones-sous-dotees"));
+    } else {
+      carte.getSource("praticiens").setData(await api("/geo/praticiens?" + p));
+    }
+  } catch { /* la carte est un complément : la recherche reste fonctionnelle */ }
+}
+
+$("#form").addEventListener("submit", (e) => { e.preventDefault(); page = 1; chercher(); });
+$("#prec").addEventListener("click", () => { page--; chercher(); window.scrollTo({ top: 0 }); });
+$("#suiv").addEventListener("click", () => { page++; chercher(); window.scrollTo({ top: 0 }); });
+$("#liste").addEventListener("click", (e) => {
+  const f = e.target.closest(".fiche");
+  if (f) ouvrirFiche(f.dataset.rpps);
+});
+$("#voile").addEventListener("click", fermerFiche);
+$("#fermer").addEventListener("click", fermerFiche);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") fermerFiche(); });
+
+let minuterie;
+for (const id of ["q", "profession", "ville", "departement"]) {
+  $("#" + id).addEventListener("input", () => {
+    clearTimeout(minuterie);
+    minuterie = setTimeout(() => { page = 1; chercher(); }, 350);
+  });
+}
+for (const id of ["specialite", "secteur", "avec_tel"]) {
+  $("#" + id).addEventListener("change", () => { page = 1; chercher(); });
+}
+
+chercher();
+stats();
+statsZsd();
+remplirFiltres();
+</script>
+</body>
+</html>

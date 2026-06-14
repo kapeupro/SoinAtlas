@@ -1,0 +1,27 @@
+# Données (volumineuses + données personnelles RGPD — ne jamais committer)
+data/
+*.txt
+*.csv
+!requirements.txt
+
+# Environnement Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node / Mapbox assets locaux éventuels
+node_modules/
+
+# Config locale / secrets
+.env
+.env.local
+
+# OS / éditeurs
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Captures et sorties temporaires
+*.png
+.playwright-mcp/

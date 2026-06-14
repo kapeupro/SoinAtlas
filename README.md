@@ -1,7 +1,8 @@
-# Annuaire RPPS — données ouvertes des professionnels de santé
+# SoinAtlas
 
-Pipeline de données + interface web cartographique au-dessus de l'**Annuaire Santé
-(RPPS)**, à partir des données ouvertes de l'État (≈1,08 M de praticiens).
+**Annuaire cartographique des professionnels de santé** — pipeline de données +
+interface web au-dessus de l'**Annuaire Santé (RPPS)**, à partir des données
+ouvertes de l'État (≈1,08 M de praticiens).
 
 **Sources** : Agence du Numérique en Santé (ANS), DREES, Santé.fr — via
 [data.gouv.fr](https://www.data.gouv.fr).
@@ -149,4 +150,3 @@ Ce sont des **données personnelles de professionnels**. Pour une publication :
 - **citer la source** (Annuaire Santé / ANS · DREES · Santé.fr, Licence Ouverte 2.0).
 
 Le `.gitignore` exclut `data/` pour éviter tout commit accidentel de données réelles.
-# SoinAtlas

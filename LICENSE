@@ -19,14 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-NOTE SUR LES DONNÉES (distinct du code ci-dessus) :
-
-Ce dépôt ne contient AUCUNE donnée. Les jeux de données utilisés par le
-pipeline proviennent de data.gouv.fr et sont publiés sous Licence Ouverte /
-Open Licence Etalab 2.0 (https://www.etalab.gouv.fr/licence-ouverte-open-licence).
-Leur réutilisation impose la mention de la source (Annuaire Santé / ANS, DREES,
-Santé.fr). La licence MIT ci-dessus couvre uniquement le code source de ce
-projet, pas les données.
